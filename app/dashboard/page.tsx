@@ -51,7 +51,7 @@ export default function Dashboard() {
       method: "POST",
       body: JSON.stringify({ roomId, name: "My Room" }),
     });
-    router.push(`/room/${roomId}`);
+    router.push(`/draw/${roomId}`);
   }}
 >
   Go to Drawing Rooms
