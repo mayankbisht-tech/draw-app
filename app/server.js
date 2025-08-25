@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 
 require('dotenv').config();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'default_secret_for_dev_123';
+const JWT_SECRET = process.env.JWT_SECRET ;
 
 if (JWT_SECRET === 'default_secret_for_dev_123') {
     console.warn('Warning: JWT_SECRET is using a default value. For production, set a strong secret in your .env file.');
