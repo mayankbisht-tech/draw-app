@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "cd app/packages/db && npx prisma generate"
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@types/bcrypt": "^6.0.0",
