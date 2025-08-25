@@ -1,95 +1,69 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { prisma } from "../../../packages/db/src";
-import type { Shape as PrismaShape, Prisma } from "@prisma/client";
+import { NextResponse } from 'next/server';
+import { prisma } from '../../../../lib/prisma';
+import type { Shape } from '../../../components/types/types';
+import { Prisma } from '@prisma/client';
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { roomId: string } }
-) {
-  const { roomId } = params;
+export async function GET(req: Request, { params }: { params: { roomId: string } }) {
+    const { roomId } = params;
 
-  try {
-    const room = await prisma.room.findUnique({
-      where: { id: roomId },
-      include: { shapes: true },
-    });
+    try {
+        const room = await prisma.room.findUnique({
+            where: { id: roomId },
+            include: { shapes: true },
+        });
 
-    if (!room) {
-      return NextResponse.json({ shapes: [] });
+        if (!room) {
+            return NextResponse.json({ error: 'Room not found' }, { status: 404 });
+        }
+
+        const transformedShapes = room.shapes.map(dbShape => {
+            const props = dbShape.props as Prisma.JsonObject;
+            return {
+                id: dbShape.id,
+                type: dbShape.type,
+                ...props,
+            };
+        });
+
+        return NextResponse.json({ shapes: transformedShapes });
+
+    } catch (error) {
+        console.error('Failed to fetch room data:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
-
-    
-    const normalizedShapes = room.shapes.map((shape: PrismaShape) => ({
-  id: shape.id,
-  type: shape.type,
-  ...(typeof shape.props === "object" && shape.props !== null
-    ? (shape.props as Record<string, unknown>)
-    : {}),
-}));
-
-    return NextResponse.json({ shapes: normalizedShapes });
-  } catch (err) {
-    console.error("Failed to get room data:", err);
-    return NextResponse.json(
-      { error: "Server error while fetching room data" },
-      { status: 500 }
-    );
-  }
 }
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { roomId: string } }
-) {
-  const { roomId } = params;
-  const shapeData = (await req.json()) as {
-    id: string;
-    type: string;
-    [key: string]: unknown;
-  };
+export async function POST(req: Request, { params }: { params: { roomId: string } }) {
+    const { roomId } = params;
+    const { shapes }: { shapes: Shape[] } = await req.json();
 
-  if (!shapeData || !shapeData.id || !shapeData.type) {
-    return NextResponse.json(
-      { message: "Invalid shape data. 'id' and 'type' are required." },
-      { status: 400 }
-    );
-  }
+    try {
+        await prisma.$transaction([
+            prisma.shape.deleteMany({
+                where: { roomId: roomId },
+            }),
+            prisma.shape.createMany({
+                data: shapes.map(shape => {
+                    const { id, type, ...props } = shape;
+                    return {
+                        id,
+                        type,
+                        props: props as Prisma.JsonObject,
+                        roomId: roomId,
+                    };
+                }),
+            }),
+        ]);
 
-  try {
-    const room = await prisma.room.findUnique({
-      where: { id: roomId },
-    });
+        const updatedRoom = await prisma.room.findUnique({
+            where: { id: roomId },
+            include: { shapes: true },
+        });
 
-    if (!room) {
-      await prisma.room.create({
-        data: { id: roomId, roomId: roomId },
-      });
+        return NextResponse.json(updatedRoom);
+
+    } catch (error) {
+        console.error('Failed to update room:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
-
-    const { id: shapeId, type, ...props } = shapeData;
-
-    await prisma.shape.upsert({
-      where: { id: shapeId },
-      update: {
-        type,
-        props: props as Prisma.InputJsonValue, 
-      },
-      create: {
-        id: shapeId,
-        type,
-        props: props as Prisma.InputJsonValue, 
-        roomId: roomId,
-      },
-    });
-
-    return NextResponse.json(shapeData);
-  } catch (err) {
-    console.error("Failed to save shape:", err);
-    const errorMessage = err instanceof Error ? err.message : "Unknown error";
-    return NextResponse.json(
-      { error: "Failed to process shape.", details: errorMessage },
-      { status: 500 }
-    );
-  }
 }
