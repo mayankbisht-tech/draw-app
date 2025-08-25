@@ -138,9 +138,7 @@ export default function Imp() {
         const meData = await meRes.json();
         setUserInfo({ id: meData.id, name: meData.name, token: meData.token });
 
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsPort = 8080;
-        const wsUrl = `${protocol}//${window.location.hostname}:${wsPort}`;
+        const wsUrl = 'wss://draw-app-olug.onrender.com';
 
         const socket = new WebSocket(`${wsUrl}/?roomId=${roomId}&token=${meData.token}`);
         ws.current = socket;
