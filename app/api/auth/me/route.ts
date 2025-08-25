@@ -1,13 +1,11 @@
-
-
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../../../../lib/prisma';
 
 export async function GET() {
-    const cookie = await cookies();
-    const token = cookie.get('token')?.value;
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
 
     if (!token) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -16,10 +14,15 @@ export async function GET() {
     try {
         const secret = process.env.JWT_SECRET;
         if (!secret) {
-            throw new Error('JWT_SECRET is not defined');
+            throw new Error('JWT_SECRET is not defined in environment variables');
         }
 
-        const decoded: any = jwt.verify(token, secret);
+        interface DecodedToken {
+            userId: string;
+            userFirstName: string;
+        }
+
+        const decoded = jwt.verify(token, secret) as DecodedToken;
 
         const user = await prisma.user.findUnique({
             where: { id: decoded.userId },
