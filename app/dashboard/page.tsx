@@ -45,18 +45,11 @@ export default function Dashboard() {
             This is your personal space. Manage your drawings and account settings here.
           </p>
           <button 
-  onClick={async () => {
-    const roomId = crypto.randomUUID();
-    await fetch("/api/room/create", {
-      method: "POST",
-      body: JSON.stringify({ roomId, name: "My Room" }),
-    });
-    router.push(`/draw/${roomId}`);
-  }}
->
-  Go to Drawing Rooms
-</button>
-
+            onClick={() => router.push('/room')}  
+            className="mt-8 px-10 py-4 rounded-full bg-gray-900 text-white text-xl font-semibold hover:bg-black transition-all duration-300 transform hover:scale-105 shadow-xl"
+          >
+            Go to Drawing Rooms
+          </button>
         </div>
       </main>
     </div>

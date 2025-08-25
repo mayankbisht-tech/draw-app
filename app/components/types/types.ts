@@ -13,7 +13,6 @@ export interface ChatMessage {
   timestamp: number;
 }
 
-// Base type for shared properties
 interface BaseShape {
   id: string;
   color?: string;
@@ -22,8 +21,6 @@ interface BaseShape {
   rotation?: number;
   scale?: number;
 }
-
-// Define specific properties for each shape type
 interface PencilShape extends BaseShape {
   type: "pencil";
   points: { x: number; y: number }[];
@@ -63,5 +60,4 @@ interface TextShape extends BaseShape {
   fontFamily?: string;
 }
 
-// The final discriminated union
 export type Shape = PencilShape | RectangleShape | CircleShape | LineShape | TextShape;
