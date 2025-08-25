@@ -1,21 +1,16 @@
 "use client";
 
-import React, { useRef, useState, type RefObject, useEffect } from "react";
+import React, { useRef, useState, type RefObject } from "react";
 import { useRouter } from "next/navigation";
 
-export default function Signin() {
+export default function Signup() {
+  const firstNameRef = useRef<HTMLInputElement>(null);
+  const lastNameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/dashboard");
-    }
-  }, [isAuthenticated, router]);
 
   const keyHandleDown = (
     e: React.KeyboardEvent<HTMLInputElement>,
@@ -31,10 +26,12 @@ export default function Signin() {
     setErrorMessage(null);
     setIsLoading(true);
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          firstName: firstNameRef.current?.value,
+          lastName: lastNameRef.current?.value,
           email: emailRef.current?.value,
           password: passwordRef.current?.value,
         }),
@@ -43,9 +40,9 @@ export default function Signin() {
       const data = await res.json();
 
       if (res.ok) {
-        setIsAuthenticated(true);
+        window.location.href = "/dashboard";
       } else {
-        setErrorMessage(data.error || "Sign-in failed. Please try again.");
+        setErrorMessage(data.error || "Sign-up failed. Please try again.");
       }
     } catch (error) {
       console.error("Network error:", error);
@@ -68,7 +65,7 @@ export default function Signin() {
 
       <div className="w-full max-w-md p-8 rounded-2xl bg-zinc-900/80 border border-zinc-800 shadow-xl">
         <div className="flex flex-col items-center space-y-6">
-          <p className="font-bold text-3xl text-white mb-4">Sign in</p>
+          <p className="font-bold text-3xl text-white mb-4">Create Account</p>
 
           {errorMessage && (
             <div className="w-full p-3 bg-red-900 text-red-100 rounded-md text-center text-sm">
@@ -76,8 +73,26 @@ export default function Signin() {
             </div>
           )}
 
+          <div className="flex gap-4 w-full">
+            <input
+              type="text"
+              ref={firstNameRef}
+              placeholder="First Name"
+              className="w-full px-5 py-3 rounded-lg bg-zinc-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-700 border border-zinc-700 transition-colors duration-200"
+              onKeyDown={(e) => keyHandleDown(e, lastNameRef)}
+              disabled={isLoading}
+            />
+            <input
+              type="text"
+              ref={lastNameRef}
+              placeholder="Last Name"
+              className="w-full px-5 py-3 rounded-lg bg-zinc-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-700 border border-zinc-700 transition-colors duration-200"
+              onKeyDown={(e) => keyHandleDown(e, emailRef)}
+              disabled={isLoading}
+            />
+          </div>
           <input
-            type="text"
+            type="email"
             ref={emailRef}
             placeholder="Email"
             className="w-full px-5 py-3 rounded-lg bg-zinc-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-700 border border-zinc-700 transition-colors duration-200"
@@ -102,8 +117,12 @@ export default function Signin() {
             onClick={handleSubmit}
             disabled={isLoading}
           >
-            {isLoading ? "Signing in..." : "Submit"}
+            {isLoading ? "Creating Account..." : "Sign Up"}
           </button>
+          <div className="text-sm text-gray-400">
+            Already have an account? 
+            <button onClick={() => router.push('/authentication/signin')} className="text-white hover:underline ml-1">Sign In</button>
+          </div>
         </div>
       </div>
     </div>

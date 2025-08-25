@@ -1,4 +1,3 @@
-// file: app/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -9,7 +8,6 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // This effect checks for a token in localStorage to update the UI
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
     setToken(savedToken);
@@ -17,24 +15,21 @@ export default function Home() {
   }, []);
 
   const handleSignOut = async () => {
-    // Clear the client-side token
     localStorage.removeItem("token");
-    setToken(null);
+    localStorage.removeItem("userInfo");
     
-    // Call the API to clear the server-side httpOnly cookie
-    await fetch('/api/auth/logout');
+    await fetch('/api/auth/logout', { method: 'POST' });
     
-    // You can optionally refresh or push to the homepage
     router.push('/');
   };
+
+  const signinUrl="/authentication/signin"
+  const signupUrl="/authentication/signup"
 
   if (isLoading) {
     return <div className="text-center mt-10 text-white">Loading...</div>;
   }
   
-  const signinUrl="/authentication/signin"
-  const signupUrl="/authentication/signup"
-
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-tr from-black via-gray-950 to-gray-950 text-gray-100 font-inter">
       <header className="bg-black shadow-lg py-4 px-6 md:px-10 lg:px-16 flex justify-between items-center rounded-b-xl">
@@ -44,10 +39,10 @@ export default function Home() {
           {token ? (
             <>
               <button
-                onClick={() => router.push('/room')}
+                onClick={() => router.push('/dashboard')}
                 className="px-5 py-2 rounded-full text-gray-400 font-medium hover:bg-stone-900 transition-colors duration-200 shadow-md"
               >
-                Rooms
+                Dashboard
               </button>
               <button
                 onClick={handleSignOut}
@@ -85,10 +80,10 @@ export default function Home() {
             visualization.
           </p>
           <button
-            onClick={() => token ? router.push('/room') : router.push(signinUrl)}
+            onClick={() => token ? router.push('/dashboard') : router.push(signinUrl)}
             className="px-10 py-4 rounded-full bg-gray-900 text-white text-xl font-semibold hover:bg-black transition-all duration-300 transform hover:scale-105 shadow-xl"
           >
-            {token ? 'Go to Drawing Room' : 'Start Designing Today'}
+            {token ? 'Go to Dashboard' : 'Start Designing Today'}
           </button>
         </div>
       </main>

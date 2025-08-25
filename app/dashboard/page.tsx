@@ -1,16 +1,24 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function Dashboard() {
   const router = useRouter();
+  const [userInfo, setUserInfo] = useState<{ name: string } | null>(null);
+  
+  useEffect(() => {
+    const storedUserInfo = localStorage.getItem('userInfo');
+    if (storedUserInfo) {
+      setUserInfo(JSON.parse(storedUserInfo));
+    }
+  }, []);
 
   const handleSignOut = async () => {
     localStorage.removeItem("token");
-    
-    await fetch('/api/auth/logout');
-    
-    window.location.href = '/';
+    localStorage.removeItem("userInfo");
+    await fetch('/api/auth/logout', { method: 'POST' });
+    router.push('/');
   };
 
   return (
@@ -31,7 +39,7 @@ export default function Dashboard() {
       <main className="flex-grow flex items-center justify-center p-6 md:p-10 lg:p-16">
         <div className="text-center max-w-4xl">
           <h1 className="text-5xl font-extrabold text-gray-200">
-            Welcome to your Dashboard
+            Welcome to your Dashboard, {userInfo?.name || 'User'}!
           </h1>
           <p className="text-lg text-gray-400 mt-4">
             This is your personal space. Manage your drawings and account settings here.

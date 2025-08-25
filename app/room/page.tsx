@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
 function CreateRoom({ roomId }: { roomId: string }) {
   const router = useRouter();
-
   const handleJoinClick = () => {
     router.push(`/draw/${roomId}`);
   };
@@ -41,7 +40,7 @@ function JoinRoom() {
       router.push(`/draw/${roomId}`);
     }
   };
-  
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleJoinClick();
@@ -50,7 +49,7 @@ function JoinRoom() {
 
   return (
     <div className="flex flex-col items-center justify-center gap-4 p-10 bg-zinc-900 rounded-2xl shadow-2xl w-[90%] max-w-md border border-zinc-800">
-       <p className="text-2xl md:text-3xl font-semibold text-gray-200 mb-4 text-center">
+      <p className="text-2xl md:text-3xl font-semibold text-gray-200 mb-4 text-center">
         Join an Existing Room
       </p>
       <input
@@ -71,10 +70,10 @@ function JoinRoom() {
   );
 }
 
-
 export default function RoomPage() {
   const [mode, setMode] = useState<"default" | "create" | "join">("default");
   const [roomId, setRoomId] = useState<string | null>(null);
+
 
   const handleCreateRoom = () => {
     const newRoomId = crypto.randomUUID();
