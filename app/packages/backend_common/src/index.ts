@@ -1,5 +1,8 @@
 import module = require("next/dist/server/route-modules/app-route/module");
 
+import dotenv=require('dotenv');
 
-const JWT_SECRET =  "123123";
+dotenv.config();
+
+const JWT_SECRET =  process.env.JWT_SECRET;
 export { JWT_SECRET };

@@ -2,8 +2,11 @@ const { WebSocketServer } = require('ws');
 const http = require('http');
 const url = require('url');
 const jwt = require('jsonwebtoken');
+const dotenv =rquire('dotenv');
 
-const JWT_SECRET = '123123'; 
+dotenv.config();
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const rooms = new Map();
 const users = new Map();
