@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Sidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
 
+// --- No changes to interfaces ---
 interface BaseShape {
   id: string;
   color?: string;
@@ -58,32 +59,51 @@ interface ChatMessage {
 type Tool = "pencil" | "rectangle" | "circle" | "line" | "eraser" | "text";
 
 const getShapeCenter = (shape: Shape): { x: number; y: number } => {
-  if (!shape || !shape.type) {
-    throw new Error("Invalid shape provided to getShapeCenter");
-  }
+  if (!shape || !shape.type) {
+    throw new Error("Invalid shape provided to getShapeCenter");
+  }
 
-  let centerX: number;
-  let centerY: number;
+  let centerX: number;
+  let centerY: number;
 
-  if (shape.type === 'rectangle') { centerX = shape.x + shape.width / 2; centerY = shape.y + shape.height / 2; }
-  else if (shape.type === 'circle') { centerX = shape.x; centerY = shape.y; }
-  else if (shape.type === 'line') { centerX = (shape.x + shape.x2) / 2; centerY = (shape.y + shape.y2) / 2; }
-  else if (shape.type === 'pencil' && shape.points && shape.points.length > 0) { 
-    const minX = Math.min(...shape.points.map(p => p.x)); 
-    const minY = Math.min(...shape.points.map(p => p.y)); 
-    const maxX = Math.max(...shape.points.map(p => p.x)); 
-    const maxY = Math.max(...shape.points.map(p => p.y)); 
-    centerX = minX + (maxX - minX) / 2; 
-    centerY = minY + (maxY - minY) / 2; 
-  }
-  else if (shape.type === 'text') {
-    const text = shape.text || "";
-    const approxWidth = text.length * (shape.fontSize || 12) * 0.5;
-    centerX = shape.x + approxWidth / 2;
-    centerY = shape.y - (shape.fontSize || 12) / 2;
-  }
-  else { centerX = (shape as any).x; centerY = (shape as any).y; }
-  return { x: centerX, y: centerY };
+  switch (shape.type) {
+    case 'rectangle':
+      centerX = shape.x + shape.width / 2;
+      centerY = shape.y + shape.height / 2;
+      break;
+    case 'circle':
+      centerX = shape.x;
+      centerY = shape.y;
+      break;
+    case 'line':
+      centerX = (shape.x + shape.x2) / 2;
+      centerY = (shape.y + shape.y2) / 2;
+      break;
+    case 'text':
+      const text = shape.text || "";
+      const approxWidth = text.length * (shape.fontSize || 12) * 0.5;
+      centerX = shape.x + approxWidth / 2;
+      centerY = shape.y - (shape.fontSize || 12) / 2;
+      break;
+    case 'pencil':
+      if (shape.points && shape.points.length > 0) {
+        const minX = Math.min(...shape.points.map(p => p.x));
+        const minY = Math.min(...shape.points.map(p => p.y));
+        const maxX = Math.max(...shape.points.map(p => p.x));
+        const maxY = Math.max(...shape.points.map(p => p.y));
+        centerX = minX + (maxX - minX) / 2;
+        centerY = minY + (maxY - minY) / 2;
+      } else {
+        centerX = shape.x;
+        centerY = shape.y;
+      }
+      break;
+    default:
+      const _exhaustiveCheck: never = shape;
+      throw new Error(`Unhandled shape type: ${(_exhaustiveCheck as Shape).type}`);
+  }
+
+  return { x: centerX, y: centerY };
 };
 const getLocalMouseCoordinates = (coords: { x: number; y: number }, shape: Shape, ctx: CanvasRenderingContext2D) => {
   ctx.save();
@@ -118,7 +138,8 @@ export default function Imp() {
   const [isTyping, setIsTyping] = useState(false);
   const [textInputPosition, setTextInputPosition] = useState<{ x: number; y: number } | null>(null);
   const [textInputValue, setTextInputValue] = useState('');
-  const [_lineDragHandle, _setLineDragHandle] = useState<'start' | 'end' | 'body' | null>(null);
+  // FIX: Removed unused state variables that caused warnings.
+  // const [_lineDragHandle, _setLineDragHandle] = useState<'start' | 'end' | 'body' | null>(null);
   const [isSidebarToggled, setIsSidebarToggled] = useState(false);
 
   const ws = useRef<WebSocket | null>(null);
@@ -142,6 +163,8 @@ export default function Imp() {
       }
   }, [roomId]);
 
+  // --- No changes to useEffects or most handlers ---
+  
   useEffect(() => {
     const initialize = async () => {
       if (!roomId) return;
@@ -402,9 +425,12 @@ export default function Imp() {
   }, [inputValue, userInfo, generateId, broadcastData]);
 
   const handleClearCanvas = useCallback(() => {
-    setShapes([]);
-    broadcastData({ type: 'clear_canvas' });
-    persistShapes([]);
+    // This function was unused, now it can be triggered by a button.
+    if (window.confirm("Are you sure you want to clear the entire canvas? This cannot be undone.")) {
+      setShapes([]);
+      broadcastData({ type: 'clear_canvas' });
+      persistShapes([]);
+    }
   }, [broadcastData, persistShapes]);
 
 
@@ -429,6 +455,7 @@ export default function Imp() {
         ctx.strokeStyle = '#3b82f6'; 
         ctx.lineWidth = 2 / (shape.scale || 1);
         ctx.setLineDash([6, 4]);
+        ctx.strokeRect(shape.x, shape.y, (shape as any).width, (shape as any).height); // Example for rect
         ctx.setLineDash([]);
       }
 
@@ -476,6 +503,7 @@ export default function Imp() {
   );
 
   return (
+    // --- The JSX part has one addition for the 'Clear Canvas' button ---
     <div className="relative min-h-screen bg-black font-inter flex text-white">
       {!isSidebarToggled && (
         <button
@@ -581,6 +609,14 @@ export default function Imp() {
             <ToolButton tool="eraser" label="Eraser">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6" /></svg>
             </ToolButton>
+            {/* FIX: Added a button to use the handleClearCanvas function */}
+            <button
+              title="Clear Canvas"
+              onClick={handleClearCanvas}
+              className="p-2 rounded-lg transition-colors duration-200 bg-red-800 text-gray-300 hover:bg-red-700"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+            </button>
           </div>
 
           <canvas
