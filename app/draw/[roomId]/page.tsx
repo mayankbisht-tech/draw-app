@@ -118,7 +118,7 @@ export default function Imp() {
   const [isTyping, setIsTyping] = useState(false);
   const [textInputPosition, setTextInputPosition] = useState<{ x: number; y: number } | null>(null);
   const [textInputValue, setTextInputValue] = useState('');
-  const [lineDragHandle, setLineDragHandle] = useState<'start' | 'end' | 'body' | null>(null);
+  const [_lineDragHandle, _setLineDragHandle] = useState<'start' | 'end' | 'body' | null>(null);
   const [isSidebarToggled, setIsSidebarToggled] = useState(false);
 
   const ws = useRef<WebSocket | null>(null);
