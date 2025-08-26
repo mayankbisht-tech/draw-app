@@ -138,6 +138,7 @@ export default function Imp() {
         const meData = await meRes.json();
         setUserInfo({ id: meData.id, name: meData.name, token: meData.token });
 
+        // FIX: Change the protocol from 'https' to 'wss'
         const wsUrl = 'wss://draw-app-olug.onrender.com';
 
         const socket = new WebSocket(`${wsUrl}/?roomId=${roomId}&token=${meData.token}`);
@@ -441,41 +442,41 @@ export default function Imp() {
   }, [isTyping, textInputPosition, textInputValue, currentDrawingShapeId, generateId, broadcastData]);
   const handleTextInputKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => { if (e.key === 'Enter') e.currentTarget.blur(); }, []);
   const handleSendMessage = useCallback(
-  (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-    if (inputValue.trim() === '' || !userInfo) {
-      console.error("Cannot send message: No user info available or input is empty.");
-      return;
-    }
+    if (inputValue.trim() === '' || !userInfo) {
+      console.error("Cannot send message: No user info available or input is empty.");
+      return;
+    }
 
-    if (ws.current?.readyState === WebSocket.OPEN) {
-      const chatMessage: ChatMessage = {
-        id: generateId(),
-        senderId: userInfo.id,
-        senderFirstName: userInfo.name,
-        senderLastName: '',
-        text: inputValue.trim(),
-        timestamp: Date.now(),
-      };
+    if (ws.current?.readyState === WebSocket.OPEN) {
+      const chatMessage: ChatMessage = {
+        id: generateId(),
+        senderId: userInfo.id,
+        senderFirstName: userInfo.name,
+        senderLastName: '',
+        text: inputValue.trim(),
+        timestamp: Date.now(),
+      };
 
-      console.log("Sending chat message:", chatMessage);
+      console.log("Sending chat message:", chatMessage);
 
-      setMessages((prev) => [...prev, chatMessage]);
+      setMessages((prev) => [...prev, chatMessage]);
 
-      ws.current.send(
-        JSON.stringify({
-          type: "chat_message",
-          message: chatMessage,
-        })
-      );
+      ws.current.send(
+        JSON.stringify({
+          type: "chat_message",
+          message: chatMessage,
+        })
+      );
 
-      setInputValue("");
-    } else {
-      console.error("WebSocket is not connected. Message not sent.");
-    }
-  },
-  [inputValue, userInfo, generateId]
+      setInputValue("");
+    } else {
+      console.error("WebSocket is not connected. Message not sent.");
+    }
+  },
+  [inputValue, userInfo, generateId]
 );
 
 
@@ -591,227 +592,227 @@ export default function Imp() {
   return (
     <div className="relative min-h-screen bg-black font-inter flex">
 
-  {!isSidebarToggled && (
-    <button
-      onClick={() => setIsSidebarToggled(true)}
-      className="fixed top-4 left-4 z-50 p-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors shadow-md"
-      aria-label="Open Sidebar"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-    </button>
-  )}
+  {!isSidebarToggled && (
+    <button
+      onClick={() => setIsSidebarToggled(true)}
+      className="fixed top-4 left-4 z-50 p-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors shadow-md"
+      aria-label="Open Sidebar"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  )}
 
-  <Sidebar
-    onBackdropClick={() => setIsSidebarToggled(false)}
-    toggled={isSidebarToggled}
-    breakPoint="all"
-    backgroundColor="#18181b"
-    width="280px"
-    rootStyles={{
-      position: "fixed",
-      height: "100%",
-      borderRight: "1px solid rgb(39 39 42)",
-      zIndex: 60,
-    }}
-  >
-    <Menu
-      className="flex flex-col h-full"
-      menuItemStyles={{
-        button: {
-          [`&:hover`]: {
-            backgroundColor: "rgb(39 39 42)",
-            color: "white",
-          },
-          borderRadius: "8px",
-          margin: "4px 8px",
-          transition: "all 0.2s ease-in-out",
-        },
-      }}
-    >
-      <div className="flex-shrink-0 border-b border-zinc-800 p-4">
-        <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-white">Drawing Room</h2>
-          <button
-            onClick={() => setIsSidebarToggled(false)}
-            className="p-1 rounded-full text-gray-400 hover:bg-zinc-800 hover:text-white transition-colors"
-            aria-label="Close Sidebar"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-      </div>
+  <Sidebar
+    onBackdropClick={() => setIsSidebarToggled(false)}
+    toggled={isSidebarToggled}
+    breakPoint="all"
+    backgroundColor="#18181b"
+    width="280px"
+    rootStyles={{
+      position: "fixed",
+      height: "100%",
+      borderRight: "1px solid rgb(39 39 42)",
+      zIndex: 60,
+    }}
+  >
+    <Menu
+      className="flex flex-col h-full"
+      menuItemStyles={{
+        button: {
+          [`&:hover`]: {
+            backgroundColor: "rgb(39 39 42)",
+            color: "white",
+          },
+          borderRadius: "8px",
+          margin: "4px 8px",
+          transition: "all 0.2s ease-in-out",
+        },
+      }}
+    >
+      <div className="flex-shrink-0 border-b border-zinc-800 p-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-lg font-semibold text-white">Drawing Room</h2>
+          <button
+            onClick={() => setIsSidebarToggled(false)}
+            className="p-1 rounded-full text-gray-400 hover:bg-zinc-800 hover:text-white transition-colors"
+            aria-label="Close Sidebar"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
 
-      <div className="flex-shrink-0 mt-2 space-y-1">
-        <MenuItem
-          icon={
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-          }
-          className="text-gray-200"
-        >
-          {userInfo ? `You: ${userInfo.name}` : "Connecting..."}
-        </MenuItem>
+      <div className="flex-shrink-0 mt-2 space-y-1">
+        <MenuItem
+          icon={
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          }
+          className="text-gray-200"
+        >
+          {userInfo ? `You: ${userInfo.name}` : "Connecting..."}
+        </MenuItem>
 
-        <MenuItem
-          icon={
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7" />
-            </svg>
-          }
-          className="text-gray-400"
-          onClick={() => router.push("/dashboard")}
-        >
-          Go to Dashboard
-        </MenuItem>
-      </div>
+        <MenuItem
+          icon={
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7" />
+            </svg>
+          }
+          className="text-gray-400"
+          onClick={() => router.push("/dashboard")}
+        >
+          Go to Dashboard
+        </MenuItem>
+      </div>
 
-      <div className="flex-grow overflow-y-auto mt-2 border-t border-zinc-800">
-        <SubMenu
-          label="Online Players"
-          defaultOpen
-          icon={
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M17 20h5v-2a3 3 0 00-5.356-1.857M7 20H2v-2a3 3 0 015.356-1.857m0 
-                 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 
-                 3 3 0 016 0zm6 3a2 2 0 11-4 0 
-                 2 2 0 014 0zM7 10a2 2 0 11-4 
-                 0 2 2 0 014 0z"
-              />
-            </svg>
-          }
-          className="text-gray-400"
-        >
-          {onlineUsers.length > 0 ? (
-            onlineUsers.map((user) => (
-              <MenuItem key={user.id} className="text-gray-300">
-                {user.name} {user.id === userInfo?.id ? "(You)" : ""}
-              </MenuItem>
-            ))
-          ) : (
-            <MenuItem key="no-users" className="text-gray-500">
-              Only you
-            </MenuItem>
-          )}
-        </SubMenu>
-      </div>
+      <div className="flex-grow overflow-y-auto mt-2 border-t border-zinc-800">
+        <SubMenu
+          label="Online Players"
+          defaultOpen
+          icon={
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M17 20h5v-2a3 3 0 00-5.356-1.857M7 20H2v-2a3 3 0 015.356-1.857m0 
+                 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 
+                 3 3 0 016 0zm6 3a2 2 0 11-4 0 
+                 2 2 0 014 0zM7 10a2 2 0 11-4 
+                 0 2 2 0 014 0z"
+              />
+            </svg>
+          }
+          className="text-gray-400"
+        >
+          {onlineUsers.length > 0 ? (
+            onlineUsers.map((user) => (
+              <MenuItem key={user.id} className="text-gray-300">
+                {user.name} {user.id === userInfo?.id ? "(You)" : ""}
+              </MenuItem>
+            ))
+          ) : (
+            <MenuItem key="no-users" className="text-gray-500">
+              Only you
+            </MenuItem>
+          )}
+        </SubMenu>
+      </div>
 
 <div className="flex-shrink-0 p-2 border-t border-gray-700 flex flex-col h-full overflow-hidden">
-  <div className="flex-1 overflow-y-auto space-y-2 p-2 rounded-md bg-gray-800 border border-gray-700 mb-2">
-    {messages.map((message) => {
-      const isOwnMessage = userInfo?.id && message.senderId === userInfo.id;
+  <div className="flex-1 overflow-y-auto space-y-2 p-2 rounded-md bg-gray-800 border border-gray-700 mb-2">
+    {messages.map((message) => {
+      const isOwnMessage = userInfo?.id && message.senderId === userInfo.id;
 
-      return (
-        <div key={message.id} className={`flex ${isOwnMessage ? "justify-end" : "justify-start"}`}>
-          <div className="flex flex-col max-w-xs">
-            {!isOwnMessage && (
-              <p className="text-xs text-gray-400 px-1 self-start font-bold">
-                {message.senderFirstName}
-              </p>
-            )}
-            <div
-              className={`py-1 px-3 mt-1 rounded-2xl break-words text-sm ${
-                isOwnMessage
-                  ? "bg-blue-600 text-white rounded-br-none"
-                  : "bg-gray-600 text-white rounded-bl-none"
-              }`}
-            >
-              {message.text}
-            </div>
-          </div>
-        </div>
-      );
-    })}
-    <div ref={messagesEndRef} />
-  </div>
+      return (
+        <div key={message.id} className={`flex ${isOwnMessage ? "justify-end" : "justify-start"}`}>
+          <div className="flex flex-col max-w-xs">
+            {!isOwnMessage && (
+              <p className="text-xs text-gray-400 px-1 self-start font-bold">
+                {message.senderFirstName}
+              </p>
+            )}
+            <div
+              className={`py-1 px-3 mt-1 rounded-2xl break-words text-sm ${
+                isOwnMessage
+                  ? "bg-blue-600 text-white rounded-br-none"
+                  : "bg-gray-600 text-white rounded-bl-none"
+              }`}
+            >
+              {message.text}
+            </div>
+          </div>
+        </div>
+      );
+    })}
+    <div ref={messagesEndRef} />
+  </div>
 
-  <form className="flex items-center gap-2" onSubmit={handleSendMessage}>
-    <input
-      type="text"
-      value={inputValue}
-      onChange={(e) => setInputValue(e.target.value)}
-      placeholder="Type a message..."
-      className="flex-grow rounded-md p-2 bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-    />
-    <button
-      type="submit"
-      className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition-colors duration-200"
-    >
-      Send
-    </button>
-  </form>
+  <form className="flex items-center gap-2" onSubmit={handleSendMessage}>
+    <input
+      type="text"
+      value={inputValue}
+      onChange={(e) => setInputValue(e.target.value)}
+      placeholder="Type a message..."
+      className="flex-grow rounded-md p-2 bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+    <button
+      type="submit"
+      className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition-colors duration-200"
+    >
+      Send
+    </button>
+  </form>
 </div>
 
-    </Menu>
-  </Sidebar>
+    </Menu>
+  </Sidebar>
 
-  <main
-    className={`flex-1 flex flex-col items-center justify-center p-5 transition-all duration-300 ${
-      isSidebarToggled ? "ml-[280px]" : ""
-    }`}
-  >
-    <div className="relative w-full h-full flex items-center justify-center">
-      <div
-        className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex flex-wrap gap-2 p-2 bg-gray-900/80 backdrop-blur-sm border border-gray-700 rounded-xl shadow-lg"
-        onMouseDown={(e) => e.stopPropagation()}
-        onTouchStart={(e) => e.stopPropagation()}
-        onDoubleClick={(e) => e.stopPropagation()}
-      >
-        {(["pencil", "line", "rectangle", "circle", "text", "eraser"] as const).map((tool) => (
-          <button
-            key={tool}
-            className={`text-white capitalize px-4 py-2 rounded-md shadow-md transition-colors duration-200 ${
-              selectedTool === tool ? "bg-gray-600" : "bg-gray-800 hover:bg-gray-700"
-            }`}
-            onClick={() => setSelectedTool(tool)}
-          >
-            {tool}
-          </button>
-        ))}
-      </div>
+  <main
+    className={`flex-1 flex flex-col items-center justify-center p-5 transition-all duration-300 ${
+      isSidebarToggled ? "ml-[280px]" : ""
+    }`}
+  >
+    <div className="relative w-full h-full flex items-center justify-center">
+      <div
+        className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex flex-wrap gap-2 p-2 bg-gray-900/80 backdrop-blur-sm border border-gray-700 rounded-xl shadow-lg"
+        onMouseDown={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+        onDoubleClick={(e) => e.stopPropagation()}
+      >
+        {(["pencil", "line", "rectangle", "circle", "text", "eraser"] as const).map((tool) => (
+          <button
+            key={tool}
+            className={`text-white capitalize px-4 py-2 rounded-md shadow-md transition-colors duration-200 ${
+              selectedTool === tool ? "bg-gray-600" : "bg-gray-800 hover:bg-gray-700"
+            }`}
+            onClick={() => setSelectedTool(tool)}
+          >
+            {tool}
+          </button>
+        ))}
+      </div>
 
-      <canvas
-        ref={canvasRef}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleEndDrawing}
-        onMouseLeave={handleEndDrawing}
-        onDoubleClick={handleDoubleClick}
-        onTouchStart={handleMouseDown}
-        onTouchMove={handleMouseMove}
-        onTouchEnd={handleEndDrawing}
-        width={canvasDimensions.width}
-        height={canvasDimensions.height}
-        className="bg-black rounded-lg shadow-xl border border-gray-800"
-        style={{
-          width: `${canvasDimensions.width}px`,
-          height: `${canvasDimensions.height}px`,
-          touchAction: "none",
-          cursor: "crosshair",
-        }}
-      />
-    </div>
+      <canvas
+        ref={canvasRef}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleEndDrawing}
+        onMouseLeave={handleEndDrawing}
+        onDoubleClick={handleDoubleClick}
+        onTouchStart={handleMouseDown}
+        onTouchMove={handleMouseMove}
+        onTouchEnd={handleEndDrawing}
+        width={canvasDimensions.width}
+        height={canvasDimensions.height}
+        className="bg-black rounded-lg shadow-xl border border-gray-800"
+        style={{
+          width: `${canvasDimensions.width}px`,
+          height: `${canvasDimensions.height}px`,
+          touchAction: "none",
+          cursor: "crosshair",
+        }}
+      />
+    </div>
 
-    {isTyping && textInputPosition && (
-      <input
-        type="text"
-        value={textInputValue}
-        onChange={(e) => setTextInputValue(e.target.value)}
-        onBlur={handleTextInputBlur}
-        onKeyPress={handleTextInputKeyPress}
-        autoFocus
-        style={{ position: "absolute", left: textInputPosition.x, top: textInputPosition.y, zIndex: 30 }}
-        className="focus:outline-none p-2 rounded bg-gray-900 border border-white text-white text-lg"
-      />
-    )}
-  </main>
+    {isTyping && textInputPosition && (
+      <input
+        type="text"
+        value={textInputValue}
+        onChange={(e) => setTextInputValue(e.target.value)}
+        onBlur={handleTextInputBlur}
+        onKeyPress={handleTextInputKeyPress}
+        autoFocus
+        style={{ position: "absolute", left: textInputPosition.x, top: textInputPosition.y, zIndex: 30 }}
+        className="focus:outline-none p-2 rounded bg-gray-900 border border-white text-white text-lg"
+      />
+    )}
+  </main>
 </div>
 
   );
