@@ -19,7 +19,7 @@ function CreateRoom({ roomId }: { roomId: string }) {
       </div>
       <button
         onClick={handleJoinClick}
-        className="w-full px-8 py-3 bg-gray-800 hover:bg-black text-white font-semibold rounded-lg shadow-lg transition-all duration-300"
+        className="w-full px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg transition-all duration-300"
       >
         Enter Room
       </button>
@@ -30,10 +30,6 @@ function CreateRoom({ roomId }: { roomId: string }) {
 function JoinRoom() {
   const router = useRouter();
   const [roomId, setRoomId] = useState<string>("");
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRoomId(event.target.value);
-  };
 
   const handleJoinClick = () => {
     if (roomId.trim()) {
@@ -55,10 +51,10 @@ function JoinRoom() {
       <input
         type="text"
         value={roomId}
-        onChange={handleInputChange}
+        onChange={(e) => setRoomId(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Enter Room ID"
-        className="px-5 py-3 border border-zinc-700 rounded-lg bg-zinc-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-700 w-full transition-colors duration-200"
+        className="px-5 py-3 border border-zinc-700 rounded-lg bg-zinc-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full transition-colors duration-200"
       />
       <button
         onClick={handleJoinClick}
@@ -72,18 +68,30 @@ function JoinRoom() {
 
 export default function RoomPage() {
   const [mode, setMode] = useState<"default" | "create" | "join">("default");
-  const [roomId, setRoomId] = useState<string | null>(null);
+  const [newlyCreatedRoomId, setNewlyCreatedRoomId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
+  const handleCreateRoom = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/room/create', { method: 'POST' });
+      if (!res.ok) {
+        throw new Error('Failed to create room');
+      }
+      const newRoom = await res.json();
+      setNewlyCreatedRoomId(newRoom.id);
+      setMode("create");     
+    } catch (error) {
+      console.error("Error creating room:", error);
 
-  const handleCreateRoom = () => {
-    const newRoomId = crypto.randomUUID();
-    setRoomId(newRoomId);
-    setMode("create");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const renderContent = () => {
-    if (mode === "create" && roomId) {
-      return <CreateRoom roomId={roomId} />;
+    if (mode === "create" && newlyCreatedRoomId) {
+      return <CreateRoom roomId={newlyCreatedRoomId} />;
     }
     if (mode === "join") {
       return <JoinRoom />;
@@ -96,9 +104,10 @@ export default function RoomPage() {
         <div className="flex flex-col gap-4 w-full">
           <button
             onClick={handleCreateRoom}
-            className="w-full px-6 py-3 bg-gray-800 hover:bg-black text-white font-semibold rounded-xl shadow-lg transition-all duration-300"
+            disabled={isLoading}
+            className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 disabled:opacity-50"
           >
-            Create a New Room
+            {isLoading ? "Creating..." : "Create a New Room"}
           </button>
           <button
             onClick={() => setMode("join")}
