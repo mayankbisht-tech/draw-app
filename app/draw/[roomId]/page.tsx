@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Sidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
 
-// --- No changes to interfaces ---
 interface BaseShape {
   id: string;
   color?: string;
@@ -105,6 +104,50 @@ const getShapeCenter = (shape: Shape): { x: number; y: number } => {
 
   return { x: centerX, y: centerY };
 };
+
+interface BoundingBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+const getShapeBounds = (shape: Shape): BoundingBox => {
+  switch (shape.type) {
+    case 'rectangle':
+      return { x: shape.x, y: shape.y, width: shape.width, height: shape.height };
+    case 'circle':
+      return {
+        x: shape.x - shape.radius,
+        y: shape.y - shape.radius,
+        width: shape.radius * 2,
+        height: shape.radius * 2,
+      };
+    case 'line':
+      const minX = Math.min(shape.x, shape.x2);
+      const minY = Math.min(shape.y, shape.y2);
+      const width = Math.abs(shape.x - shape.x2);
+      const height = Math.abs(shape.y - shape.y2);
+      return { x: minX, y: minY, width, height };
+    case 'pencil':
+      if (!shape.points || shape.points.length === 0) {
+        return { x: shape.x, y: shape.y, width: 0, height: 0 };
+      }
+      const minXP = Math.min(...shape.points.map(p => p.x));
+      const minYP = Math.min(...shape.points.map(p => p.y));
+      const maxXP = Math.max(...shape.points.map(p => p.x));
+      const maxYP = Math.max(...shape.points.map(p => p.y));
+      return { x: minXP, y: minYP, width: maxXP - minXP, height: maxYP - minYP };
+    case 'text':
+      const fontSize = shape.fontSize || 24;
+      const approxWidth = shape.text.length * fontSize * 0.6; // Approximation
+      return { x: shape.x, y: shape.y - fontSize, width: approxWidth, height: fontSize };
+    default:
+      const _exhaustiveCheck: never = shape;
+      throw new Error(`Unhandled shape type in getShapeBounds: ${(_exhaustiveCheck as Shape).type}`);
+  }
+};
+
 const getLocalMouseCoordinates = (coords: { x: number; y: number }, shape: Shape, ctx: CanvasRenderingContext2D) => {
   ctx.save();
   const { x: shapeCenterX, y: shapeCenterY } = getShapeCenter(shape);
@@ -116,7 +159,6 @@ const getLocalMouseCoordinates = (coords: { x: number; y: number }, shape: Shape
   ctx.restore();
   return { x: coords.x * invTransform.a + coords.y * invTransform.c + invTransform.e, y: coords.x * invTransform.b + coords.y * invTransform.d + invTransform.f };
 };
-
 
 export default function Imp() {
   const router = useRouter();
@@ -138,8 +180,6 @@ export default function Imp() {
   const [isTyping, setIsTyping] = useState(false);
   const [textInputPosition, setTextInputPosition] = useState<{ x: number; y: number } | null>(null);
   const [textInputValue, setTextInputValue] = useState('');
-  // FIX: Removed unused state variables that caused warnings.
-  // const [_lineDragHandle, _setLineDragHandle] = useState<'start' | 'end' | 'body' | null>(null);
   const [isSidebarToggled, setIsSidebarToggled] = useState(false);
 
   const ws = useRef<WebSocket | null>(null);
@@ -162,8 +202,6 @@ export default function Imp() {
           console.error("Failed to persist shapes to the database:", error);
       }
   }, [roomId]);
-
-  // --- No changes to useEffects or most handlers ---
   
   useEffect(() => {
     const initialize = async () => {
@@ -425,7 +463,6 @@ export default function Imp() {
   }, [inputValue, userInfo, generateId, broadcastData]);
 
   const handleClearCanvas = useCallback(() => {
-    // This function was unused, now it can be triggered by a button.
     if (window.confirm("Are you sure you want to clear the entire canvas? This cannot be undone.")) {
       setShapes([]);
       broadcastData({ type: 'clear_canvas' });
@@ -455,7 +492,10 @@ export default function Imp() {
         ctx.strokeStyle = '#3b82f6'; 
         ctx.lineWidth = 2 / (shape.scale || 1);
         ctx.setLineDash([6, 4]);
-        ctx.strokeRect(shape.x, shape.y, (shape as any).width, (shape as any).height); // Example for rect
+        
+        const bounds = getShapeBounds(shape);
+        ctx.strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
+        
         ctx.setLineDash([]);
       }
 
@@ -463,7 +503,6 @@ export default function Imp() {
       ctx.lineWidth = 2;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
-
 
       switch (shape.type) {
         case 'rectangle': ctx.strokeRect(shape.x, shape.y, shape.width, shape.height); break;
@@ -503,7 +542,6 @@ export default function Imp() {
   );
 
   return (
-    // --- The JSX part has one addition for the 'Clear Canvas' button ---
     <div className="relative min-h-screen bg-black font-inter flex text-white">
       {!isSidebarToggled && (
         <button
@@ -609,7 +647,6 @@ export default function Imp() {
             <ToolButton tool="eraser" label="Eraser">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6" /></svg>
             </ToolButton>
-            {/* FIX: Added a button to use the handleClearCanvas function */}
             <button
               title="Clear Canvas"
               onClick={handleClearCanvas}
