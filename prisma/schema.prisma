@@ -1,8 +1,7 @@
-
 generator client {
   provider = "prisma-client-js"
-  
 }
+
 datasource DB {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -14,18 +13,18 @@ model User {
   lastname  String?
   email     String   @unique
   password  String
-  chats     Chat[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  chats     Chat[]
 }
 
 model Room {
   id        String   @id @default(uuid())
   roomId    String   @unique
-  shapes    Shape[]
-  chats     Chat[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  chats     Chat[]
+  shapes    Shape[]
 }
 
 model Shape {
@@ -41,6 +40,6 @@ model Chat {
   message String
   userId  String
   roomId  String
-  user    User   @relation(fields: [userId], references: [id])
   room    Room   @relation(fields: [roomId], references: [id])
+  user    User   @relation(fields: [userId], references: [id])
 }
