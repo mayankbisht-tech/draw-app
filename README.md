@@ -29,7 +29,7 @@ This project demonstrates the integration of **Next.js, WebSockets, Prisma, and 
 
 | Landing Page | Drawing Room Lobby | Collaborative Canvas |
 | :---: | :---: | :---: |
-| ![Landing Page](https://github.com/mayankbisht-tech/draw-app/blob/main/screenshots/06.09.2025_19.08.53_REC.png?raw=true) | ![Drawing Room Lobby](https://github.com/mayankbisht-tech/draw-app/blob/main/screenshots/06.09.2025_19.09.18_REC.png) | ![Collaborative Canvas](https://github.com/mayankbisht-tech/draw-app/blob/main/screenshots/06.09.54_REC.png?raw=true) |
+| ![Landing Page](https://github.com/mayankbisht-tech/draw-app/blob/main/screenshots/06.09.2025_19.08.53_REC.png?raw=true) | ![Drawing Room Lobby](https://github.com/mayankbisht-tech/draw-app/blob/main/screenshots/06.09.2025_19.09.18_REC.png?raw=true) | ![Collaborative Canvas](https://github.com/mayankbisht-tech/draw-app/blob/main/screenshots/06.09.2025_19.09.54_REC.png?raw=true) |
 
 
 ## ⚙️ Installation & Setup  
